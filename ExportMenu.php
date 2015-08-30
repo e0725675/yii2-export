@@ -629,9 +629,10 @@ class ExportMenu extends GridView
         $writer = $this->_objPHPExcelWriter;
         $sheet = $this->_objPHPExcelSheet;
 		
-        if ($this->_exportType === self::FORMAT_CSV) {
+        if ($config['writer'] === self::FORMAT_CSV) {
 			$writer->setDelimiter($config['config']['colDelimiter'])->setEnclosure($config['config']['enclosure'])->setLineEnding($config['config']['rowDelimiter']);
-		} else if ($this->_exportType === self::FORMAT_TEXT) {
+		}
+		if ($this->_exportType === self::FORMAT_TEXT) {
             $writer->setDelimiter("\t");
         }
         if ($this->autoWidth) {
