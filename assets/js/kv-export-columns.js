@@ -2,7 +2,7 @@
  * @package   yii2-export
  * @author    Kartik Visweswaran <kartikv2@gmail.com>
  * @copyright Copyright &copy; Kartik Visweswaran, Krajee.com, 2015
- * @version   1.2.2
+ * @version   1.2.3
  *
  * Export Columns Selector Validation Module.
  *
@@ -12,6 +12,8 @@
  * For more Yii related demos visit http://demos.krajee.com
  */
 (function ($) {
+    "use strict";
+
     var ExportColumns = function (element, options) {
         var self = this;
         self.$element = $(element);
@@ -23,10 +25,10 @@
         constructor: ExportColumns,
         listen: function () {
             var self = this, $el = self.$element, $tog = $el.find('input[name="export_columns_toggle"]');
-            $el.on('click', function (e) {
+            $el.off('click').on('click', function (e) {
                 e.stopPropagation();
             });
-            $tog.on('change', function () {
+            $tog.off('change').on('change', function () {
                 var checked = $tog.is(':checked');
                 $el.find('input[name="export_columns_selector[]"]:not([disabled])').prop('checked', checked);
             });

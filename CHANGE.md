@@ -1,5 +1,28 @@
-version 1.2.2
-=============
+Change Log: `yii2-export`
+=========================
+
+## version 1.2.3
+
+**Date:** 19-Jul-2015
+
+- (enh #43): Added new `clearBuffers` property for better fix of #40.
+- (enh #44): Improve validation to retrieve the right translation messages folder.
+- (enh #45): Fix buffer clearing.
+- (enh #46): New `pjaxContainerId` property added to widget to enable refreshing via pjax.
+- (enh #47): Set asset bundle dependencies with yii2-krajee-base.
+- (enh #49): Set a better PHP Excel version dependency.
+- (enh #50): Better exit and resetting of memory after output generation.
+- (enh #51): Fix to correct right filtering of exported data via pjax.
+- (enh #52): Bind export elements better on jQuery events.
+- (bug #62): Correct export request param for allowing multiple export menus on the same page.
+- (bug #64): Alternative buffer emulation by setting `stream` to `false` and `streamAfterSave` to `true`.
+- (enh #69): Various enhancements to export functionality.
+- (enh #72): Configurable menu container tag when `asDropdown` is `false`. Fixes #73.
+- (enh #75): Add Spanish translations.
+- (enh #76): Allow fetching models in batches. Fixes #70.
+
+## version 1.2.2
+
 **Date:** 14-Feb-2015
 
 - (enh #37): Added zh-CN translations
@@ -8,14 +31,14 @@ version 1.2.2
 - (enh #41): New bool property `initProvider` to clear previously fetched models before render.
 - Set copyright year to current.
 
-version 1.2.1
-=============
+## version 1.2.1
+
 **Date:** 20-Jan-2015
 
 - (bug #34): Set lastModifiedBy to default to username instead of datetime 
 
-version 1.2.0
-=============
+## version 1.2.0
+
 **Date:** 12-Jan-2015
 
 - (enh #17): New column selector feature to allow selection of columns
@@ -45,8 +68,8 @@ version 1.2.0
 - Revamp to use new Krajee base Module and TranslationTrait.
 - Code formatting updates as per Yii2 coding style.
 
-version 1.1.0
-=============
+## version 1.1.0
+
 **Date:** 26-Dec-2014
 
 - (enh #10): Set composer json dependency for yii2-grid.
@@ -59,8 +82,8 @@ version 1.1.0
 - (bug #21): Set correct reference to `ActiveDataProvider` and `ActiveQueryInterface`.
 - (enh #22): Add property `enableFormatter` to enable/disable yii grid formatter.
 
-version 1.0.0
-=============
+## version 1.0.0
+
 **Date:** 17-Dec-2014
 
 - Initial release
