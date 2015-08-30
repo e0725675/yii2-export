@@ -560,12 +560,15 @@ class ExportMenu extends GridView
         $this->initPHPExcel();
         $this->initPHPExcelWriter($config['writer']);
         $this->initPHPExcelSheet();
-        $this->generateHeader();
+        $this->generateHeader($config);
         $row = $this->generateBody();
         $this->generateFooter($row);
         $writer = $this->_objPHPExcelWriter;
         $sheet = $this->_objPHPExcelSheet;
-        if ($this->_exportType === self::FORMAT_TEXT) {
+		
+        if ($this->_exportType === self::FORMAT_CSV) {
+			$writer->setDelimiter($config['config']['colDelimiter'])->setEnclosure($config['config']['enclosure'])->setLineEnding($config['config']['rowDelimiter']);
+		} else if ($this->_exportType === self::FORMAT_TEXT) {
             $writer->setDelimiter("\t");
         }
         if ($this->autoWidth) {
@@ -716,7 +719,8 @@ class ExportMenu extends GridView
                 'alertMsg' => Yii::t('kvexport', 'The HTML export file will be generated for download.'),
                 'mime' => 'text/html',
                 'extension' => 'html',
-                'writer' => 'HTML'
+                'writer' => 'HTML',
+				'rename' => ['Email' => 'User.Email',],
             ],
             self::FORMAT_CSV => [
                 'label' => Yii::t('kvexport', 'CSV'),
@@ -727,7 +731,8 @@ class ExportMenu extends GridView
                 'alertMsg' => Yii::t('kvexport', 'The CSV export file will be generated for download.'),
                 'mime' => 'application/csv',
                 'extension' => 'csv',
-                'writer' => 'CSV'
+                'writer' => 'CSV',
+				'rename' => ['Email' => 'User.Email',],
             ],
             self::FORMAT_TEXT => [
                 'label' => Yii::t('kvexport', 'Text'),
@@ -738,7 +743,13 @@ class ExportMenu extends GridView
                 'alertMsg' => Yii::t('kvexport', 'The TEXT export file will be generated for download.'),
                 'mime' => 'text/plain',
                 'extension' => 'txt',
-                'writer' => 'CSV'
+                'writer' => 'CSV',
+				'rename' => ['Email' => 'User.Email',],
+                'config' => [
+                    'colDelimiter' => ",",
+                    'rowDelimiter' => "\r\n",
+                    'enclosure' => '"',
+                ],
             ],
             self::FORMAT_PDF => [
                 'label' => Yii::t('kvexport', 'PDF'),
@@ -749,7 +760,8 @@ class ExportMenu extends GridView
                 'alertMsg' => Yii::t('kvexport', 'The PDF export file will be generated for download.'),
                 'mime' => 'application/pdf',
                 'extension' => 'pdf',
-                'writer' => 'PDF'
+                'writer' => 'PDF',
+				'rename' => ['Email' => 'User.Email',],
             ],
             self::FORMAT_EXCEL => [
                 'label' => Yii::t('kvexport', 'Excel 95 +'),
@@ -760,7 +772,8 @@ class ExportMenu extends GridView
                 'alertMsg' => Yii::t('kvexport', 'The EXCEL 95+ (xls) export file will be generated for download.'),
                 'mime' => 'application/vnd.ms-excel',
                 'extension' => 'xls',
-                'writer' => 'Excel5'
+                'writer' => 'Excel5',
+				'rename' => ['Email' => 'User.Email',],
             ],
             self::FORMAT_EXCEL_X => [
                 'label' => Yii::t('kvexport', 'Excel 2007+'),
@@ -771,7 +784,8 @@ class ExportMenu extends GridView
                 'alertMsg' => Yii::t('kvexport', 'The EXCEL 2007+ (xlsx) export file will be generated for download.'),
                 'mime' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                 'extension' => 'xlsx',
-                'writer' => 'Excel2007'
+                'writer' => 'Excel2007',
+				'rename' => ['Email' => 'User.Email',],
             ],
         ];
     }
@@ -986,7 +1000,7 @@ class ExportMenu extends GridView
     /**
      * Generates the output data header content.
      */
-    public function generateHeader()
+    public function generateHeader($config)
     {
         $columns = $this->getVisibleColumns();
         if (count($columns) == 0) {
@@ -1005,6 +1019,9 @@ class ExportMenu extends GridView
             $this->_endCol++;
             /* @var $column Column */
             $head = ($column instanceof \yii\grid\DataColumn) ? $this->getColumnHeader($column) : $column->header;
+			if (isset($config['rename'][$head])) {
+				$head = $config['rename'][$head];
+			}
             $cell = $sheet->setCellValue(self::columnName($this->_endCol) . $this->_beginRow, $head, true);
             // Apply formatting to header cell
             $cell = $sheet->getStyle(self::columnName($this->_endCol) . $this->_beginRow)->applyFromArray($style);
