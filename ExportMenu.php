@@ -624,7 +624,7 @@ class ExportMenu extends GridView
         $this->initPHPExcelWriter($config['writer']);
         $this->initPHPExcelSheet();
         $this->generateHeader($config);
-        $row = $this->generateBody();
+        $row = $this->generateBody($config);
         $this->generateFooter($row);
         $writer = $this->_objPHPExcelWriter;
         $sheet = $this->_objPHPExcelSheet;
@@ -646,11 +646,15 @@ class ExportMenu extends GridView
             if (!file_exists($this->folder)) {
                 $this->folder = Yii::getAlias('@webroot');
             }
-            $file = self::slash($this->folder) . $this->filename . '.' . $config['extension'];
+            $real_filename = $this->filename;
+            $real_folder = $this->folder;
+            if (isset($config['filename'])) $real_filename = $config['filename'];
+            if (isset($config['folder'])) $real_folder = $config['folder'];
+            $file = self::slash($real_folder) . $real_filename . '.' . $config['extension'];
             $writer->save($file);
             if ($this->streamAfterSave) {
                 $this->clearOutputBuffers();
-                $this->setHttpHeaders();
+                $this->setHttpHeaders($config);
                 readfile($file);
                 if ($this->deleteAfterSave) {
                     @unlink($file);
@@ -663,7 +667,7 @@ class ExportMenu extends GridView
                 if ($this->_triggerDownload && $this->_doNotStream && $this->afterSaveView !== false) {
                     $config = ArrayHelper::getValue($this->exportConfig, $this->_exportType, []);
                     if (!empty($config)) {
-                        $file = $this->filename . '.' . $config['extension'];
+                        $file =  $real_filename . '.' . $config['extension'];
                         echo $this->render($this->afterSaveView, [
                             'file' => $file,
                             'icon' => ($this->fontAwesome ? 'fa fa-' : 'glyphicon glyphicon-') . $config['icon'],
@@ -1205,8 +1209,8 @@ class ExportMenu extends GridView
              * @var Column $column
              */
             $head = ($column instanceof DataColumn) ? $this->getColumnHeader($column) : $column->header;
-			if (isset($config['rename'][$head])) {
-				$head = $config['rename'][$head];
+			if (isset($column->attribute) && isset($config['rename'][$column->attribute])) {
+				$head = $config['rename'][$column->attribute];
 			}
             $id = self::columnName($this->_endCol) . $this->_beginRow;
             $cell = $sheet->setCellValue($id, $head, true);
@@ -1313,7 +1317,7 @@ class ExportMenu extends GridView
      *
      * @return int the number of output rows.
      */
-    public function generateBody()
+    public function generateBody($config)
     {
         $this->_endRow = 0;
         $columns = $this->getVisibleColumns();
@@ -1328,7 +1332,7 @@ class ExportMenu extends GridView
             $keys = $this->_provider->getKeys();
             foreach ($models as $index => $model) {
                 $key = $keys[$index];
-                $this->generateRow($model, $key, $this->_endRow);
+                $this->generateRow($model, $key, $this->_endRow, $config);
                 $this->_endRow++;
             }
             if ($this->_provider->pagination) {
@@ -1360,7 +1364,7 @@ class ExportMenu extends GridView
      *
      * @return void
      */
-    public function generateRow($model, $key, $index)
+    public function generateRow($model, $key, $index, $config)
     {
         /**
          * @var Column $column
@@ -1377,6 +1381,10 @@ class ExportMenu extends GridView
                     $this->formatter->format($column->getDataCellValue($model, $key, $index), $format) :
                     $column->renderDataCell($model, $key, $index)) :
                     call_user_func($column->content, $model, $key, $index, $column);
+                // apply process
+	            if (isset($column->attribute) && isset($config['process'][$column->attribute])) {
+					$value = call_user_func($config['process'][$column->attribute], $value);
+				}
             }
             if (empty($value) && !empty($column->attribute) && $column->attribute !== null) {
                 $value = ArrayHelper::getValue($model, $column->attribute, '');
@@ -1439,7 +1447,10 @@ class ExportMenu extends GridView
         if (!empty($mime)) {
             header("Content-Type: {$mime}; charset={$this->encoding}");
         }
-        header("Content-Disposition: attachment; filename={$this->filename}.{$extension}");
+        $real_filename = $this->filename;
+        $real_folder = $this->folder;
+        if (isset($config['filename'])) $real_filename = $config['filename'];
+        header("Content-Disposition: attachment; filename={$real_filename}.{$extension}");
         header("Cache-Control: max-age=0");
     }
 
